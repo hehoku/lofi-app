@@ -6,7 +6,7 @@ import abi from './utils/Lofi.json'
 function App () {
   const [currentAccount, setCurrentAccount] = useState('')
   const [lofiInputValue, setLofiInputValue] = useState('')
-  const contractAddress = '0x1e7d0f40219591e1bd149994c802e6261d2c07e5'
+  const contractAddress = '0xfaeef3203051a918d9d087ff13c1df792a238cc7'
   const contractABI = abi.abi
 
   // check if wallet is connected
@@ -128,10 +128,16 @@ function App () {
         placeholder='Submit your favorite lofi song'
       />
       <button
-        onClick={getLofis}
+        onClick={handleSubmit}
         className='text-base font-medium rounded-lg p-3 bg-blue-300'
       >
         Submit
+      </button>
+      <button
+        onClick={getLofis}
+        className='text-base font-medium rounded-lg p-3 bg-blue-300'
+      >
+        Check Lofis
       </button>
     </div>
   )
