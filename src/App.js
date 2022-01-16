@@ -108,37 +108,39 @@ function App () {
   }, [])
 
   return (
-    <div className='flex flex-col items-center w-8/12'>
-      <h1 className='text-xl font-bold'>Hi, {formatAddress(currentAccount)}</h1>
-      {currentAccount ? null : (
+    <div className='flex flex-col items-center w-8/12 m-auto'>
+      <h1 className='text-xl font-bold'>
+        Hi,{' '}
+        {currentAccount
+          ? formatAddress(currentAccount)
+          : 'Connect your wallet first'}
+      </h1>
+      {currentAccount ? (
+        <div className='flex flex-col w-full items-center'>
+          <input
+            className='w-1/2 m-6 focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none text-sm leading-6 text-slate-900 placeholder-slate-400 rounded-md py-2 pl-10 ring-1 ring-slate-200 shadow-sm'
+            type='text'
+            value={lofiInputValue}
+            onChange={e => setLofiInputValue(e.target.value)}
+            aria-label='submit lofi song'
+            placeholder='Submit your favorite lofi song'
+          />
+          <button
+            onClick={handleSubmit}
+            className='w-1/5 text-base font-medium rounded-lg p-3 bg-blue-300'
+          >
+            Submit
+          </button>
+        </div>
+      ) : (
         <button
-          className='w-3/6 bg-blue-600 p-4 rounded-md text-white text-lg font-medium'
+          className='w-3/6 bg-blue-600 p-4 mt-10 rounded-md text-white text-lg font-medium'
           onClick={connectWallet}
         >
           {' '}
           Connect Wallet
         </button>
       )}
-      <input
-        className='focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none w-full text-sm leading-6 text-slate-900 placeholder-slate-400 rounded-md py-2 pl-10 ring-1 ring-slate-200 shadow-sm'
-        type='text'
-        value={lofiInputValue}
-        onChange={e => setLofiInputValue(e.target.value)}
-        aria-label='submit lofi song'
-        placeholder='Submit your favorite lofi song'
-      />
-      <button
-        onClick={handleSubmit}
-        className='text-base font-medium rounded-lg p-3 bg-blue-300'
-      >
-        Submit
-      </button>
-      <button
-        onClick={getLofis}
-        className='text-base font-medium rounded-lg p-3 bg-blue-300'
-      >
-        Check Lofis
-      </button>
     </div>
   )
 }
