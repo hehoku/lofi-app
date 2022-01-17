@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import { ethers } from 'ethers'
 import abi from './utils/Lofi.json'
+import Spotify from 'react-spotify-embed'
 
 function App () {
   const [currentAccount, setCurrentAccount] = useState('')
   const [lofiInputValue, setLofiInputValue] = useState('')
+  const [lofis, setLofis] = useState([])
   const contractAddress = '0xfaeef3203051a918d9d087ff13c1df792a238cc7'
   const contractABI = abi.abi
 
@@ -27,6 +29,7 @@ function App () {
         const account = accounts[0]
         setCurrentAccount(account)
         console.log('found an ahuthorized account:', account)
+        await getLofis()
       } else {
         console.log('no authorized account found')
       }
@@ -46,6 +49,7 @@ function App () {
       const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
       console.log('connected account', accounts[0])
       setCurrentAccount(accounts[0])
+      await getLofis()
     } catch (error) {
       console.log(error)
     }
@@ -71,13 +75,12 @@ function App () {
           signer
         )
 
-        const submitLofiTxn = await lofiContract.newLofi(lofiInputValue)
+        const submitLofiTxn = await lofiContract.newLofi(lofiInputValue.trim())
         console.log('submitting...', submitLofiTxn.hash)
         await submitLofiTxn.wait()
         console.log('submitted', submitLofiTxn.hash)
 
-        // const allLofis = await lofiContract.getAllLofis()
-        // console.log(allLofis)
+        await getLofis()
       }
     } catch (error) {
       console.log(error)
@@ -97,6 +100,7 @@ function App () {
         )
         const allLofis = await lofiContract.getAllLofis()
         console.log(allLofis)
+        setLofis(allLofis)
       }
     } catch (error) {
       console.log(error)
@@ -141,6 +145,34 @@ function App () {
           Connect Wallet
         </button>
       )}
+      {/* show lofis */}
+      <div className='flex flex-row content-center mt-10'>
+        <Lofis lofis={lofis} />
+      </div>
+    </div>
+  )
+}
+
+const Lofis = ({ lofis }) => {
+  return (
+    lofis.length > 0 &&
+    lofis.map(lofi => <LofiItem key={lofi.timestamp.toString()} lofi={lofi} />)
+  )
+}
+
+const LofiItem = ({ lofi }) => {
+  function isValidUrl (_string) {
+    const matchpattern = /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/gm
+    return matchpattern.test(_string)
+  }
+
+  return (
+    <div key={lofi.timestamp.toString()}>
+      {isValidUrl(lofi.lofiUrl.trim()) ? (
+        <div className='mx-10'>
+          <Spotify link={lofi.lofiUrl.trim()} />
+        </div>
+      ) : null}
     </div>
   )
 }
