@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import './App.css'
 import { ethers } from 'ethers'
 import abi from './utils/Lofi.json'
@@ -11,8 +11,30 @@ function App () {
   const contractAddress = '0xfaeef3203051a918d9d087ff13c1df792a238cc7'
   const contractABI = abi.abi
 
+  const getLofis = useCallback(async () => {
+    const { ethereum } = window
+    try {
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum)
+        const signer = provider.getSigner()
+        const lofiContract = new ethers.Contract(
+          contractAddress,
+          contractABI,
+          signer
+        )
+        const allLofis = await lofiContract.getAllLofis()
+        console.log(allLofis)
+        setLofis(allLofis)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }, [contractABI, contractAddress])
+
   // check if wallet is connected
-  const checkIfWalletIsConnected = async () => {
+  // useCallback is used to prevent re-rendering
+
+  const checkIfWalletIsConnected = useCallback(async () => {
     try {
       const { ethereum } = window
 
@@ -36,7 +58,7 @@ function App () {
     } catch (error) {
       console.error(error)
     }
-  }
+  }, [getLofis])
 
   const connectWallet = async () => {
     try {
@@ -87,29 +109,9 @@ function App () {
     }
   }
 
-  const getLofis = async () => {
-    const { ethereum } = window
-    try {
-      if (ethereum) {
-        const provider = new ethers.providers.Web3Provider(ethereum)
-        const signer = provider.getSigner()
-        const lofiContract = new ethers.Contract(
-          contractAddress,
-          contractABI,
-          signer
-        )
-        const allLofis = await lofiContract.getAllLofis()
-        console.log(allLofis)
-        setLofis(allLofis)
-      }
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
   useEffect(() => {
     checkIfWalletIsConnected()
-  }, [])
+  }, [checkIfWalletIsConnected])
 
   return (
     <div className='flex flex-col items-center w-8/12 m-auto'>
@@ -161,9 +163,16 @@ const Lofis = ({ lofis }) => {
 }
 
 const LofiItem = ({ lofi }) => {
-  function isValidUrl (_string) {
-    const matchpattern = /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/gm
-    return matchpattern.test(_string)
+  function isValidUrl (string) {
+    let url
+
+    try {
+      url = new URL(string)
+    } catch (_) {
+      return false
+    }
+
+    return url.protocol === 'http:' || url.protocol === 'https:'
   }
 
   return (
