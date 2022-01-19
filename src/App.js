@@ -4,7 +4,7 @@ import { ethers } from 'ethers'
 import abi from './utils/Lofi.json'
 import Spotify from 'react-spotify-embed'
 
-const contractAddress = '0xfaeef3203051a918d9d087ff13c1df792a238cc7'
+const contractAddress = '0x6afafe9fdc9aa5d729c9fd42c25d68efb3adcbe8'
 const contractABI = abi.abi
 
 function App () {
@@ -212,6 +212,30 @@ const LofiItem = ({ lofi, index, handleGetLofisFromLofis }) => {
     }
   }
 
+  // handle send tip to lofi subimitter
+  const handleSendtip = async index => {
+    try {
+      const { ethereum } = window
+
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum)
+        const signer = provider.getSigner()
+        const lofiContract = new ethers.Contract(
+          contractAddress,
+          contractABI,
+          signer
+        )
+
+        const sendTipTxn = await lofiContract.tip(index)
+        console.log('sending tip...', sendTipTxn.hash)
+        await sendTipTxn.wait()
+        console.log('sent tip', sendTipTxn.hash)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <div key={lofi.timestamp.toString()}>
       {isValidUrl(lofi.lofiUrl.trim()) ? (
@@ -219,14 +243,16 @@ const LofiItem = ({ lofi, index, handleGetLofisFromLofis }) => {
           <Spotify link={lofi.lofiUrl.trim()} />
           <p>{lofi.submitter}</p>
           <p>upvote count {lofi.upvoteCount.toNumber()}</p>
-          <p>{index}</p>
           <button
             className='btn bg-blue-600 w-40 h-12 text-white rounded-lg my-4'
             onClick={handleUpvote.bind(this, index)}
           >
             Upvote
           </button>
-          <button className='btn bg-blue-600 w-40 h-12 text-white rounded-lg'>
+          <button
+            className='btn bg-blue-600 w-40 h-12 text-white rounded-lg'
+            onClick={handleSendtip.bind(this, lofi.submitter)}
+          >
             Send tip
           </button>
         </div>
